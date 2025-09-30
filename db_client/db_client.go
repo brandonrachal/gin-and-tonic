@@ -10,56 +10,45 @@ import (
 )
 
 type DBClient struct {
-	DbConn             *sqlx.DB
-	createUserTableSql string
-	insertUserStmt     *sqlx.Stmt
-	getUserStmt        *sqlx.Stmt
-	updateUserStmt     *sqlx.Stmt
-	getAllUsersSql     string
+	DbConn         *sqlx.DB
+	insertUserStmt *sqlx.Stmt
+	getUserStmt    *sqlx.Stmt
+	updateUserStmt *sqlx.Stmt
+	getAllUsersSql string
 }
-
-// ":memory:"
 
 func NewDBClient(dataSourceName string) (*DBClient, error) {
 	dbConn, dbConnErr := dbutils.NewSQLiteDBConn(dataSourceName)
 	if dbConnErr != nil {
 		return nil, dbConnErr
 	}
-	createUserTableSql := `CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT,
-		email TEXT,
-	);`
-	insertUserStmt, insertUserStmtErr := dbConn.Preparex("insert into users (name, email) values (?, ?)")
+	insertUserSql := "insert into users (first_name, last_name, email) values (?, ?, ?)"
+	insertUserStmt, insertUserStmtErr := dbConn.Preparex(insertUserSql)
 	if insertUserStmtErr != nil {
 		return nil, insertUserStmtErr
 	}
-	getUserStmt, getUserStmtErr := dbConn.Preparex("select id, name, email from users where id = ?")
+	getUserSql := "select id, first_name, last_name, email from users where id = ?"
+	getUserStmt, getUserStmtErr := dbConn.Preparex(getUserSql)
 	if getUserStmtErr != nil {
 		return nil, getUserStmtErr
 	}
-	updateUserStmt, updateUserStmtErr := dbConn.Preparex("update users set name = ?, email = ? where id = ?")
+	updateUserSql := "update users set first_name = ?, last_name = ?, email = ? where id = ?"
+	updateUserStmt, updateUserStmtErr := dbConn.Preparex(updateUserSql)
 	if updateUserStmtErr != nil {
 		return nil, updateUserStmtErr
 	}
-	getAllUsersSql := `SELECT id, name, email FROM users;`
-
+	getAllUsersSql := `SELECT id, first_name, last_name, email FROM users;`
 	return &DBClient{
-		DbConn:             dbConn,
-		createUserTableSql: createUserTableSql,
-		insertUserStmt:     insertUserStmt,
-		getUserStmt:        getUserStmt,
-		updateUserStmt:     updateUserStmt,
-		getAllUsersSql:     getAllUsersSql,
+		DbConn:         dbConn,
+		insertUserStmt: insertUserStmt,
+		getUserStmt:    getUserStmt,
+		updateUserStmt: updateUserStmt,
+		getAllUsersSql: getAllUsersSql,
 	}, nil
 }
 
-func (db *DBClient) CreateUserTable(ctx context.Context) (sql.Result, error) {
-	return db.DbConn.ExecContext(ctx, db.createUserTableSql)
-}
-
-func (db *DBClient) InsertUser(ctx context.Context, name, email string) (sql.Result, error) {
-	return db.insertUserStmt.ExecContext(ctx, name, email)
+func (db *DBClient) InsertUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
+	return db.insertUserStmt.ExecContext(ctx, firstName, lastName, email)
 }
 
 func (db *DBClient) GetUser(ctx context.Context, id int) (*User, error) {
@@ -80,8 +69,8 @@ func (db *DBClient) GetAllUsers(ctx context.Context) ([]User, error) {
 	return users, nil
 }
 
-func (db *DBClient) UpdateUser(ctx context.Context, name, email string, id int) (sql.Result, error) {
-	return db.updateUserStmt.ExecContext(ctx, name, email, id)
+func (db *DBClient) UpdateUser(ctx context.Context, firstName, lastName, email string, id int) (sql.Result, error) {
+	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
 }
 
 func (db *DBClient) Close() error {
