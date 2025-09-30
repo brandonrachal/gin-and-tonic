@@ -42,7 +42,6 @@ func main() {
 
 	migrateClient, migrateClientErr := migrations.NewClient(dbutils.SQLite, dsn, migrationTable, migrationDir)
 	if migrateClientErr != nil {
-		panic(migrateClientErr)
 		fmt.Printf("error getting new migration client - %s\n", migrateClientErr)
 		os.Exit(1)
 	}
