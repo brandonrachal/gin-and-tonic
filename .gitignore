@@ -1,6 +1,9 @@
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
+
+# Mac OS X files
+.DS_Store
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -24,9 +27,12 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
+# Ignore all environment files.
+/.env*
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# For local development
+local/
