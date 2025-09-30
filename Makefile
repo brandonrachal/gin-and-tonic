@@ -1,4 +1,4 @@
-.PHONY: all build clean test help vet
+.PHONY: all build clean test vet help
 
 # Define the output directory for binaries
 BIN_DIR := bin
@@ -6,7 +6,7 @@ BIN_DIR := bin
 # List of command directories to build
 COMMANDS := migration_client api_server
 
-all: build
+all: vet test clean build
 
 build: $(addprefix $(BIN_DIR)/, $(COMMANDS))
 
@@ -17,7 +17,7 @@ $(BIN_DIR)/%: cmd/%/main.go
 
 clean:
 	@echo "Cleaning up $(BIN_DIR)"
-	@rm -rf $(BIN_DIR)
+	@find $(BIN_DIR) -type f ! -name ".gitkeep" -delete
 
 test:
 	go test ./...
@@ -27,5 +27,9 @@ vet:
 
 help:
 	@echo "Available targets:"
+	@echo "  all: Vets the code, tests it, cleans the bin, builds the programs"
+	@echo "  build: Builds all programs"
+	@echo "  clean: Removes all programs from bin folder"
+	@echo "  vet: Vet all Go code in the project"
 	@echo "  test: Runs all Go tests in the project"
 	@echo "  help: Displays this help message"
