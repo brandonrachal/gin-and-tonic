@@ -1,9 +1,7 @@
 .PHONY: all build clean test vet help
 
-# Define the output directory for binaries
 BIN_DIR := bin
 
-# List of command directories to build
 COMMANDS := migration_client api_server
 
 all: vet test clean build
