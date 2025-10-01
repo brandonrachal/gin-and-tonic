@@ -34,5 +34,8 @@ go.work.sum
 .idea/
 .vscode/
 
-# For local development
+# For local
+development
 local/
+
+bin/
