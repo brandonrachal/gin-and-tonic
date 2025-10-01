@@ -1,4 +1,4 @@
-package db_client
+package db
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type DBClient struct {
+type Client struct {
 	DbConn         *sqlx.DB
 	insertUserStmt *sqlx.Stmt
 	getUserStmt    *sqlx.Stmt
@@ -17,7 +17,7 @@ type DBClient struct {
 	getAllUsersSql string
 }
 
-func NewDBClient(dataSourceName string) (*DBClient, error) {
+func NewClient(dataSourceName string) (*Client, error) {
 	dbConn, dbConnErr := dbutils.NewSQLiteDBConn(dataSourceName)
 	if dbConnErr != nil {
 		return nil, dbConnErr
@@ -38,7 +38,7 @@ func NewDBClient(dataSourceName string) (*DBClient, error) {
 		return nil, updateUserStmtErr
 	}
 	getAllUsersSql := `SELECT id, first_name, last_name, email FROM users;`
-	return &DBClient{
+	return &Client{
 		DbConn:         dbConn,
 		insertUserStmt: insertUserStmt,
 		getUserStmt:    getUserStmt,
@@ -47,11 +47,11 @@ func NewDBClient(dataSourceName string) (*DBClient, error) {
 	}, nil
 }
 
-func (db *DBClient) InsertUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
+func (db *Client) InsertUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
 	return db.insertUserStmt.ExecContext(ctx, firstName, lastName, email)
 }
 
-func (db *DBClient) GetUser(ctx context.Context, id int) (*User, error) {
+func (db *Client) GetUser(ctx context.Context, id int) (*User, error) {
 	var user User
 	err := db.getUserStmt.GetContext(ctx, &user, id)
 	if err != nil {
@@ -60,7 +60,7 @@ func (db *DBClient) GetUser(ctx context.Context, id int) (*User, error) {
 	return &user, nil
 }
 
-func (db *DBClient) GetAllUsers(ctx context.Context) ([]User, error) {
+func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
 	var users []User
 	err := db.DbConn.SelectContext(ctx, &users, db.getAllUsersSql)
 	if err != nil {
@@ -69,11 +69,11 @@ func (db *DBClient) GetAllUsers(ctx context.Context) ([]User, error) {
 	return users, nil
 }
 
-func (db *DBClient) UpdateUser(ctx context.Context, firstName, lastName, email string, id int) (sql.Result, error) {
+func (db *Client) UpdateUser(ctx context.Context, firstName, lastName, email string, id int) (sql.Result, error) {
 	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
 }
 
-func (db *DBClient) Close() error {
+func (db *Client) Close() error {
 	var err error
 	err = db.insertUserStmt.Close()
 	if err != nil {

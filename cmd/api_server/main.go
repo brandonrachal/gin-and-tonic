@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
+	"github.com/brandonrachal/gin-and-tonic/db"
+	"github.com/brandonrachal/gin-and-tonic/server"
 	"github.com/brandonrachal/go-toolbox/cliutils"
+	"github.com/brandonrachal/go-toolbox/envutils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,12 +18,23 @@ func main() {
 	ctx, cancelFunc, logger := cliutils.InitDevConsole()
 	defer cancelFunc()
 
+	goEnv, goEnvErr := envutils.NewGoEnv()
+	if goEnvErr != nil {
+		logger.Fatalf("Could not retrieve the go env - %s\n", goEnvErr)
+	}
+
+	rootPath := goEnv.ModuleRootPath()
+	sqliteDBPath := filepath.Join(rootPath, "data/sqlite_database.db")
+	dbClient, dbClientErr := db.NewClient(sqliteDBPath)
+	if dbClientErr != nil {
+		logger.Fatalf("Could not retrieve the db client - %s\n", dbClientErr)
+	}
+	handler := server.NewHandler(logger, dbClient)
+
 	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Welcome Gin Server",
-		})
-	})
+	router.GET("/ping", handler.Ping)
+	router.POST("/user", handler.InsertUserHandler)
+	router.GET("/user", handler.GetUserHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -28,7 +42,7 @@ func main() {
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("listen: %s\n", err)
+			logger.Fatalf("listen: %s\n", err)
 		}
 	}()
 
