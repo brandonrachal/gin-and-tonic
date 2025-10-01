@@ -35,8 +35,9 @@ func main() {
 	router.GET("/ping", handler.Ping)
 	router.POST("/user", handler.InsertUserHandler)
 	router.GET("/user", handler.GetUserHandler)
-	router.GET("/users", handler.GetAllUsersHandler)
 	router.PUT("/user", handler.UpdateUserHandler)
+	router.DELETE("/user", handler.DeleteUserHandler)
+	router.GET("/users", handler.GetAllUsersHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",

@@ -14,6 +14,7 @@ type Client struct {
 	insertUserStmt *sqlx.Stmt
 	getUserStmt    *sqlx.Stmt
 	updateUserStmt *sqlx.Stmt
+	deleteUserStmt *sqlx.Stmt
 	getAllUsersSql string
 }
 
@@ -32,6 +33,11 @@ func NewClient(dataSourceName string) (*Client, error) {
 	if getUserStmtErr != nil {
 		return nil, getUserStmtErr
 	}
+	deleteUserSql := "delete from users where id = ?"
+	deleteUserStmt, deleteUserStmtErr := dbConn.Preparex(deleteUserSql)
+	if deleteUserStmtErr != nil {
+		return nil, deleteUserStmtErr
+	}
 	updateUserSql := "update users set first_name = ?, last_name = ?, email = ? where id = ?"
 	updateUserStmt, updateUserStmtErr := dbConn.Preparex(updateUserSql)
 	if updateUserStmtErr != nil {
@@ -43,6 +49,7 @@ func NewClient(dataSourceName string) (*Client, error) {
 		insertUserStmt: insertUserStmt,
 		getUserStmt:    getUserStmt,
 		updateUserStmt: updateUserStmt,
+		deleteUserStmt: deleteUserStmt,
 		getAllUsersSql: getAllUsersSql,
 	}, nil
 }
@@ -60,6 +67,14 @@ func (db *Client) GetUser(ctx context.Context, id int) (*User, error) {
 	return &user, nil
 }
 
+func (db *Client) UpdateUser(ctx context.Context, id int, firstName, lastName, email string) (sql.Result, error) {
+	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
+}
+
+func (db *Client) DeleteUser(ctx context.Context, id int) (sql.Result, error) {
+	return db.deleteUserStmt.ExecContext(ctx, id)
+}
+
 func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
 	var users []User
 	err := db.DbConn.SelectContext(ctx, &users, db.getAllUsersSql)
@@ -67,10 +82,6 @@ func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return users, nil
-}
-
-func (db *Client) UpdateUser(ctx context.Context, id int, firstName, lastName, email string) (sql.Result, error) {
-	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
 }
 
 func (db *Client) Close() error {
@@ -84,6 +95,10 @@ func (db *Client) Close() error {
 		return err
 	}
 	err = db.updateUserStmt.Close()
+	if err != nil {
+		return err
+	}
+	err = db.deleteUserStmt.Close()
 	if err != nil {
 		return err
 	}
