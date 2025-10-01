@@ -40,7 +40,7 @@ func (h *Handler) GetUserHandler(ctx *gin.Context) {
 		h.logger.Printf("Error retriving user id '%s' - %s\n", formUserId, userIdErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
 func (h *Handler) InsertUserHandler(ctx *gin.Context) {
@@ -62,8 +62,7 @@ func (h *Handler) InsertUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
-	resp := gin.H{"user_id": userId}
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, gin.H{"user_id": userId})
 }
 
 func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
@@ -79,8 +78,7 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
-	resp := gin.H{"user_id": user.Id}
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, gin.H{"user_id": user.Id})
 }
 
 func (h *Handler) DeleteUserHandler(ctx *gin.Context) {
@@ -93,12 +91,12 @@ func (h *Handler) DeleteUserHandler(ctx *gin.Context) {
 		h.logger.Printf("Error converting user id to int - %s\n", userIdErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
-	user, userErr := h.DBClient.GetUser(ctx, *userId)
-	if userErr != nil {
-		h.logger.Printf("Error retriving user id '%s' - %s\n", formUserId, userIdErr)
+	_, deleteUserErr := h.DBClient.DeleteUser(ctx, *userId)
+	if deleteUserErr != nil {
+		h.logger.Printf("Error deleting user id '%s' - %s\n", formUserId, userIdErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully."})
 }
 
 func (h *Handler) GetAllUsersHandler(ctx *gin.Context) {
@@ -107,5 +105,8 @@ func (h *Handler) GetAllUsersHandler(ctx *gin.Context) {
 		h.logger.Printf("Error retriving all users - %s\n", usersErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
-	ctx.JSON(http.StatusOK, users)
+	if users == nil {
+		users = make([]db.User, 0)
+	}
+	ctx.JSON(http.StatusOK, gin.H{"users": users})
 }
