@@ -43,6 +43,15 @@ func (h *Handler) GetUserHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
+func (h *Handler) GetAllUsersHandler(ctx *gin.Context) {
+	users, usersErr := h.DBClient.GetAllUsers(ctx)
+	if usersErr != nil {
+		h.logger.Printf("Error retriving all users - %s\n", usersErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+	}
+	ctx.JSON(http.StatusOK, users)
+}
+
 func (h *Handler) InsertUserHandler(ctx *gin.Context) {
 	var user db.User
 	if err := ctx.ShouldBind(&user); err != nil {
@@ -63,5 +72,22 @@ func (h *Handler) InsertUserHandler(ctx *gin.Context) {
 		return
 	}
 	resp := gin.H{"user_id": userId}
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
+	var user db.User
+	if err := ctx.ShouldBind(&user); err != nil {
+		h.logger.Printf("Error binding user - %s\n", err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	_, resultErr := h.DBClient.UpdateUser(ctx, user.Id, user.FirstName, user.LastName, user.Email)
+	if resultErr != nil {
+		h.logger.Printf("Error inserting user - %s\n", resultErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
+		return
+	}
+	resp := gin.H{"user_id": user.Id}
 	ctx.JSON(http.StatusOK, resp)
 }

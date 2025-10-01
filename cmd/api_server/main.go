@@ -35,6 +35,8 @@ func main() {
 	router.GET("/ping", handler.Ping)
 	router.POST("/user", handler.InsertUserHandler)
 	router.GET("/user", handler.GetUserHandler)
+	router.GET("/users", handler.GetAllUsersHandler)
+	router.PUT("/user", handler.UpdateUserHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -42,7 +44,7 @@ func main() {
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatalf("listen: %s\n", err)
+			logger.Fatalf("failed to start server - %s\n", err)
 		}
 	}()
 
@@ -54,7 +56,7 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Fatal("Server forced to shutdown: ", err)
+		logger.Fatalf("Server forced to shutdown - %s\n", err)
 	}
 	logger.Println("Server exiting")
 }

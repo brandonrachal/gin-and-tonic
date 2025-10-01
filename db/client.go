@@ -69,7 +69,7 @@ func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
 	return users, nil
 }
 
-func (db *Client) UpdateUser(ctx context.Context, firstName, lastName, email string, id int) (sql.Result, error) {
+func (db *Client) UpdateUser(ctx context.Context, id int, firstName, lastName, email string) (sql.Result, error) {
 	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
 }
 
