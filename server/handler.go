@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/brandonrachal/gin-and-tonic/db"
-	"github.com/brandonrachal/go-toolbox/datautils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,32 +24,14 @@ func (h *Handler) Ping(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-func (h *Handler) GetUserHandler(ctx *gin.Context) {
-	formUserId, exists := ctx.GetPostForm("user_id")
-	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "bad request"})
-	}
-	userId, userIdErr := datautils.ToInt(formUserId)
-	if userIdErr != nil {
-		h.logger.Printf("Error converting user id to int - %s\n", userIdErr)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
-	}
-	user, userErr := h.DBClient.GetUser(ctx, *userId)
-	if userErr != nil {
-		h.logger.Printf("Error retriving user id '%s' - %s\n", formUserId, userIdErr)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
-	}
-	ctx.JSON(http.StatusOK, gin.H{"user": user})
-}
-
-func (h *Handler) InsertUserHandler(ctx *gin.Context) {
-	var user db.User
-	if err := ctx.ShouldBind(&user); err != nil {
+func (h *Handler) CreateUserHandler(ctx *gin.Context) {
+	var user db.NewUser
+	if err := ctx.ShouldBindJSON(&user); err != nil {
 		h.logger.Printf("Error binding user - %s\n", err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	result, resultErr := h.DBClient.InsertUser(ctx, user.FirstName, user.LastName, user.Email)
+	result, resultErr := h.DBClient.CreateUser(ctx, user.FirstName, user.LastName, user.Email)
 	if resultErr != nil {
 		h.logger.Printf("Error inserting user - %s\n", resultErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
@@ -62,12 +43,27 @@ func (h *Handler) InsertUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user_id": userId})
+	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"id": userId}})
+}
+
+func (h *Handler) GetUserHandler(ctx *gin.Context) {
+	var userId db.UserId
+	if err := ctx.ShouldBindJSON(&userId); err != nil {
+		h.logger.Printf("Error binding user - %s\n", err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, userErr := h.DBClient.User(ctx, userId.Id)
+	if userErr != nil {
+		h.logger.Printf("Error retriving user id %d - %s\n", userId.Id, userErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
 func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 	var user db.User
-	if err := ctx.ShouldBind(&user); err != nil {
+	if err := ctx.ShouldBindJSON(&user); err != nil {
 		h.logger.Printf("Error binding user - %s\n", err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -78,35 +74,29 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user_id": user.Id})
+	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"id": user.Id}})
 }
 
 func (h *Handler) DeleteUserHandler(ctx *gin.Context) {
-	formUserId, exists := ctx.GetPostForm("user_id")
-	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "bad request"})
+	var userId db.UserId
+	if err := ctx.ShouldBindJSON(&userId); err != nil {
+		h.logger.Printf("Error binding user - %s\n", err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-	userId, userIdErr := datautils.ToInt(formUserId)
-	if userIdErr != nil {
-		h.logger.Printf("Error converting user id to int - %s\n", userIdErr)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
-	}
-	_, deleteUserErr := h.DBClient.DeleteUser(ctx, *userId)
+	_, deleteUserErr := h.DBClient.DeleteUser(ctx, userId.Id)
 	if deleteUserErr != nil {
-		h.logger.Printf("Error deleting user id '%s' - %s\n", formUserId, userIdErr)
+		h.logger.Printf("Error retriving user id %d - %s\n", userId.Id, deleteUserErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully."})
 }
 
 func (h *Handler) GetAllUsersHandler(ctx *gin.Context) {
-	users, usersErr := h.DBClient.GetAllUsers(ctx)
+	users, usersErr := h.DBClient.AllUsers(ctx)
 	if usersErr != nil {
 		h.logger.Printf("Error retriving all users - %s\n", usersErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
-	}
-	if users == nil {
-		users = make([]db.User, 0)
 	}
 	ctx.JSON(http.StatusOK, gin.H{"users": users})
 }

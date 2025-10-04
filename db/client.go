@@ -11,7 +11,7 @@ import (
 
 type Client struct {
 	DbConn         *sqlx.DB
-	insertUserStmt *sqlx.Stmt
+	createUserStmt *sqlx.Stmt
 	getUserStmt    *sqlx.Stmt
 	updateUserStmt *sqlx.Stmt
 	deleteUserStmt *sqlx.Stmt
@@ -23,10 +23,10 @@ func NewClient(dataSourceName string) (*Client, error) {
 	if dbConnErr != nil {
 		return nil, dbConnErr
 	}
-	insertUserSql := "insert into users (first_name, last_name, email) values (?, ?, ?)"
-	insertUserStmt, insertUserStmtErr := dbConn.Preparex(insertUserSql)
-	if insertUserStmtErr != nil {
-		return nil, insertUserStmtErr
+	insertUserSql := "insert into users(first_name, last_name, email) values (?, ?, ?)"
+	createUserStmt, createUserStmtErr := dbConn.Preparex(insertUserSql)
+	if createUserStmtErr != nil {
+		return nil, createUserStmtErr
 	}
 	getUserSql := "select id, first_name, last_name, email from users where id = ?"
 	getUserStmt, getUserStmtErr := dbConn.Preparex(getUserSql)
@@ -43,10 +43,10 @@ func NewClient(dataSourceName string) (*Client, error) {
 	if updateUserStmtErr != nil {
 		return nil, updateUserStmtErr
 	}
-	getAllUsersSql := `SELECT id, first_name, last_name, email FROM users;`
+	getAllUsersSql := `SELECT id, first_name, last_name, email FROM users`
 	return &Client{
 		DbConn:         dbConn,
-		insertUserStmt: insertUserStmt,
+		createUserStmt: createUserStmt,
 		getUserStmt:    getUserStmt,
 		updateUserStmt: updateUserStmt,
 		deleteUserStmt: deleteUserStmt,
@@ -54,11 +54,11 @@ func NewClient(dataSourceName string) (*Client, error) {
 	}, nil
 }
 
-func (db *Client) InsertUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
-	return db.insertUserStmt.ExecContext(ctx, firstName, lastName, email)
+func (db *Client) CreateUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
+	return db.createUserStmt.ExecContext(ctx, firstName, lastName, email)
 }
 
-func (db *Client) GetUser(ctx context.Context, id int) (*User, error) {
+func (db *Client) User(ctx context.Context, id int) (*User, error) {
 	var user User
 	err := db.getUserStmt.GetContext(ctx, &user, id)
 	if err != nil {
@@ -75,7 +75,7 @@ func (db *Client) DeleteUser(ctx context.Context, id int) (sql.Result, error) {
 	return db.deleteUserStmt.ExecContext(ctx, id)
 }
 
-func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
+func (db *Client) AllUsers(ctx context.Context) ([]User, error) {
 	var users []User
 	err := db.DbConn.SelectContext(ctx, &users, db.getAllUsersSql)
 	if err != nil {
@@ -86,7 +86,7 @@ func (db *Client) GetAllUsers(ctx context.Context) ([]User, error) {
 
 func (db *Client) Close() error {
 	var err error
-	err = db.insertUserStmt.Close()
+	err = db.createUserStmt.Close()
 	if err != nil {
 		return err
 	}
