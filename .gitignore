@@ -39,4 +39,4 @@ development
 local/
 
 bin/
-data/sqlite_database.db
+data/
