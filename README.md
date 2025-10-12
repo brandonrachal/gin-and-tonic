@@ -13,7 +13,7 @@ A go api server for fun
 
     curl -X POST \
     -H "Content-Type: application/json" \
-    -d '{"first_name": "Brandon", "last_name": "Rachal", "email": "brandon.rachal@gmail.com"}' \
+    -d '{"first_name": "Brandon", "last_name": "Rachal", "email": "brandon.rachal@gmail.com", "birthday": "2025-10-12"}' \
     localhost:8080/user
 
 ### Get a user
@@ -24,7 +24,7 @@ A go api server for fun
 
     curl -X PUT \
     -H "Content-Type: application/json" \
-    -d '{"id": 1, "first_name": "Phillip", "last_name": "Rachal", "email": "brandon.rachal@gmail.com"}' \
+    -d '{"id": 1, "first_name": "Phillip", "last_name": "Rachal", "email": "brandon.rachal@gmail.com", "birthday": "2025-10-12"}' \
     localhost:8080/user
 
 ### Delete a user

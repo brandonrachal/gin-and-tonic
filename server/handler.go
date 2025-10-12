@@ -25,13 +25,14 @@ func (h *Handler) Ping(ctx *gin.Context) {
 }
 
 func (h *Handler) CreateUserHandler(ctx *gin.Context) {
-	var user db.NewUser
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var newUser db.NewUser
+	if err := ctx.ShouldBindJSON(&newUser); err != nil {
 		h.logger.Printf("Error binding user - %s\n", err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	result, resultErr := h.DBClient.CreateUser(ctx, user.FirstName, user.LastName, user.Email)
+	result, resultErr := h.DBClient.CreateUser(ctx, newUser.FirstName, newUser.LastName,
+		newUser.Email, newUser.Birthday.ToTime())
 	if resultErr != nil {
 		h.logger.Printf("Error inserting user - %s\n", resultErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
@@ -43,6 +44,7 @@ func (h *Handler) CreateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"id": userId}})
 }
 
@@ -74,7 +76,12 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"id": user.Id}})
+	updatedUser, updatedUserErr := h.DBClient.User(ctx, user.Id)
+	if updatedUserErr != nil {
+		h.logger.Printf("Error retriving user id %d - %s\n", user.Id, updatedUserErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"user": updatedUser}})
 }
 
 func (h *Handler) DeleteUserHandler(ctx *gin.Context) {

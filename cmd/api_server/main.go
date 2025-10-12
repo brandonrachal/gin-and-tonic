@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
 	ctx, cancelFunc, logger := cliutils.InitDevConsole()
 	defer cancelFunc()
 	logger.SetOutput(gin.DefaultWriter)

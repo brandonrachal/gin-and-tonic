@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/brandonrachal/go-toolbox/dbutils"
 	"github.com/jmoiron/sqlx"
@@ -23,12 +24,12 @@ func NewClient(dataSourceName string) (*Client, error) {
 	if dbConnErr != nil {
 		return nil, dbConnErr
 	}
-	insertUserSql := "insert into users(first_name, last_name, email) values (?, ?, ?)"
-	createUserStmt, createUserStmtErr := dbConn.Preparex(insertUserSql)
+	createUserSql := "insert into users(first_name, last_name, email, birthday) values (?, ?, ?, ?)"
+	createUserStmt, createUserStmtErr := dbConn.Preparex(createUserSql)
 	if createUserStmtErr != nil {
 		return nil, createUserStmtErr
 	}
-	getUserSql := "select id, first_name, last_name, email from users where id = ?"
+	getUserSql := "select id, first_name, last_name, email, birthday from users where id = ?"
 	getUserStmt, getUserStmtErr := dbConn.Preparex(getUserSql)
 	if getUserStmtErr != nil {
 		return nil, getUserStmtErr
@@ -38,12 +39,12 @@ func NewClient(dataSourceName string) (*Client, error) {
 	if deleteUserStmtErr != nil {
 		return nil, deleteUserStmtErr
 	}
-	updateUserSql := "update users set first_name = ?, last_name = ?, email = ? where id = ?"
+	updateUserSql := "update users set first_name = ?, last_name = ?, email = ?, birthday = ? where id = ?"
 	updateUserStmt, updateUserStmtErr := dbConn.Preparex(updateUserSql)
 	if updateUserStmtErr != nil {
 		return nil, updateUserStmtErr
 	}
-	getAllUsersSql := `SELECT id, first_name, last_name, email FROM users`
+	getAllUsersSql := `SELECT id, first_name, last_name, email, birthday FROM users`
 	return &Client{
 		DbConn:         dbConn,
 		createUserStmt: createUserStmt,
@@ -54,8 +55,8 @@ func NewClient(dataSourceName string) (*Client, error) {
 	}, nil
 }
 
-func (db *Client) CreateUser(ctx context.Context, firstName, lastName, email string) (sql.Result, error) {
-	return db.createUserStmt.ExecContext(ctx, firstName, lastName, email)
+func (db *Client) CreateUser(ctx context.Context, firstName, lastName, email string, birthday time.Time) (sql.Result, error) {
+	return db.createUserStmt.ExecContext(ctx, firstName, lastName, email, birthday)
 }
 
 func (db *Client) User(ctx context.Context, id int) (*User, error) {

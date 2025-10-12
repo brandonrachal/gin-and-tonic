@@ -25,9 +25,10 @@ func main() {
 		fmt.Printf("error loading go enviroment - %s", goEnvErr)
 		os.Exit(1)
 	}
-
 	moduleRoot := goEnv.ModuleRootPath()
-	authRequired := false
+
+	var authRequired bool
+	authRequired = false
 	migrationDir := fmt.Sprintf("%s/migrations", moduleRoot)
 	dsn := fmt.Sprintf("%s/data/sqlite_database.db", moduleRoot)
 
