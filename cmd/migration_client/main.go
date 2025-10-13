@@ -26,13 +26,10 @@ func main() {
 		os.Exit(1)
 	}
 	moduleRoot := goEnv.ModuleRootPath()
-
-	var authRequired bool
-	authRequired = false
 	migrationDir := fmt.Sprintf("%s/migrations", moduleRoot)
 	dsn := fmt.Sprintf("%s/data/sqlite_database.db", moduleRoot)
 
-	migrateCmdData, migrateCmdDataErr := migrations.GetMigrationCmdData(authRequired)
+	migrateCmdData, migrateCmdDataErr := migrations.GetMigrationCmdData(false)
 	if migrateCmdDataErr != nil {
 		fmt.Printf("error getting migration cmd data - %s\n", migrateCmdDataErr)
 		os.Exit(1)
