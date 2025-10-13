@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brandonrachal/go-toolbox/jsonutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +25,7 @@ func TestUserId(t *testing.T) {
 
 func TestNewUser(t *testing.T) {
 	req := require.New(t)
-	birthday, birthdayErr := time.Parse(DateFormat, "2025-10-12")
+	birthday, birthdayErr := time.Parse(jsonutils.SimpleDateFormat, "2025-10-12")
 	req.NoError(birthdayErr)
 	var newUser NewUser
 	err := json.Unmarshal([]byte(NewUserJson), &newUser)
@@ -37,7 +38,7 @@ func TestNewUser(t *testing.T) {
 
 func TestUser(t *testing.T) {
 	req := require.New(t)
-	birthday, birthdayErr := time.Parse(DateFormat, "2025-10-12")
+	birthday, birthdayErr := time.Parse(jsonutils.SimpleDateFormat, "2025-10-12")
 	req.NoError(birthdayErr)
 	var user User
 	err := json.Unmarshal([]byte(UserJson), &user)
