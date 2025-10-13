@@ -1,9 +1,18 @@
 # Gin and Tonic
 A go api server for fun
 
+
 ### Compile the programs
 
     make all
+
+### Create sqlite database file
+
+    touch data/sqlite_database.db
+
+### Run the migrations
+
+    ./bin/migration_client up-all
 
 ###  Run the web server
 
@@ -24,7 +33,7 @@ A go api server for fun
 
     curl -X PUT \
     -H "Content-Type: application/json" \
-    -d '{"id": 1, "first_name": "Phillip", "last_name": "Rachal", "email": "brandon.rachal@gmail.com", "birthday": "2025-10-12"}' \
+    -d '{"id": 1, "first_name": "Sam", "last_name": "Rachal", "email": "sam.rachal@gmail.com", "birthday": "1990-06-15"}' \
     localhost:8080/user
 
 ### Delete a user
