@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "gin-and-tonic",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "servers": [
+    {
+      "url": "{{host}}"
+    }
+  ],
+  "paths": {
+    "/user": {
+      "post": {
+        "summary": "Create User",
+        "tags": [],
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "birthday": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update User",
+        "tags": [],
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "birthday": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get User",
+        "tags": [],
+        "responses": {}
+      },
+      "delete": {
+        "summary": "Delete User",
+        "tags": [],
+        "responses": {}
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Get Users",
+        "tags": [],
+        "responses": {}
+      }
+    },
+    "/users_with_age": {
+      "get": {
+        "summary": "Get Users with Age",
+        "tags": [],
+        "responses": {}
+      }
+    },
+    "/age_stats": {
+      "get": {
+        "summary": "Get Age Stats",
+        "tags": [],
+        "responses": {}
+      }
+    }
+  }
+}

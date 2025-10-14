@@ -70,7 +70,7 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	_, resultErr := h.DBClient.UpdateUser(ctx, user.Id, user.FirstName, user.LastName, user.Email)
+	_, resultErr := h.DBClient.UpdateUser(ctx, user.Id, user.FirstName, user.LastName, user.Email, user.Birthday.ToTime())
 	if resultErr != nil {
 		h.logger.Printf("Error inserting user - %s\n", resultErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert user"})
@@ -81,7 +81,7 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 		h.logger.Printf("Error retrieving user id %d - %s\n", user.Id, updatedUserErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"user": updatedUser}})
+	ctx.JSON(http.StatusOK, gin.H{"user": updatedUser})
 }
 
 func (h *Handler) DeleteUserHandler(ctx *gin.Context) {

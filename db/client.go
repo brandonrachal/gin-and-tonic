@@ -48,7 +48,7 @@ func NewClient(dataSourceName string) (*Client, error) {
 		return nil, updateUserStmtErr
 	}
 	getUsersSql := `SELECT id, first_name, last_name, email, birthday FROM users`
-	getUsersWithAgeSql := `select first_name, last_name, email, birthday, ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) AS age_in_years from users;`
+	getUsersWithAgeSql := `select id, first_name, last_name, email, birthday, ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) AS age_in_years from users;`
 	getAgeStatsSql := `select
     count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 13 then 1 end) as preteen,
     count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 12 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 20 then 1 end) as teens,
@@ -89,8 +89,8 @@ func (db *Client) User(ctx context.Context, id int) (*User, error) {
 	return &user, nil
 }
 
-func (db *Client) UpdateUser(ctx context.Context, id int, firstName, lastName, email string) (sql.Result, error) {
-	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, id)
+func (db *Client) UpdateUser(ctx context.Context, id int, firstName, lastName, email string, birthday time.Time) (sql.Result, error) {
+	return db.updateUserStmt.ExecContext(ctx, firstName, lastName, email, birthday, id)
 }
 
 func (db *Client) DeleteUser(ctx context.Context, id int) (sql.Result, error) {

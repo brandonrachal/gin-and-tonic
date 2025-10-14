@@ -41,6 +41,7 @@ func main() {
 	router.GET("/users", handler.GetUsersHandler)
 	router.GET("/users_with_age", handler.GetUsersWithAgeHandler)
 	router.GET("/age_stats", handler.GetAgeStatsHandler)
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
