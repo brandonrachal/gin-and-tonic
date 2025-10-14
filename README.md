@@ -44,3 +44,10 @@ A go api server for fun
 
     curl -X GET -H "Content-Type: application/json" localhost:8080/users
 
+### Get all users with age
+
+    curl -X GET -H "Content-Type: application/json" localhost:8080/users_with_age
+
+### Get age stats
+
+    curl -X GET -H "Content-Type: application/json" localhost:8080/age_stats

@@ -78,7 +78,7 @@ func (h *Handler) UpdateUserHandler(ctx *gin.Context) {
 	}
 	updatedUser, updatedUserErr := h.DBClient.User(ctx, user.Id)
 	if updatedUserErr != nil {
-		h.logger.Printf("Error retriving user id %d - %s\n", user.Id, updatedUserErr)
+		h.logger.Printf("Error retrieving user id %d - %s\n", user.Id, updatedUserErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"user": map[string]any{"user": updatedUser}})
@@ -93,17 +93,35 @@ func (h *Handler) DeleteUserHandler(ctx *gin.Context) {
 	}
 	_, deleteUserErr := h.DBClient.DeleteUser(ctx, userId.Id)
 	if deleteUserErr != nil {
-		h.logger.Printf("Error retriving user id %d - %s\n", userId.Id, deleteUserErr)
+		h.logger.Printf("Error retrieving user id %d - %s\n", userId.Id, deleteUserErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully."})
 }
 
-func (h *Handler) GetAllUsersHandler(ctx *gin.Context) {
-	users, usersErr := h.DBClient.AllUsers(ctx)
+func (h *Handler) GetUsersHandler(ctx *gin.Context) {
+	users, usersErr := h.DBClient.Users(ctx)
 	if usersErr != nil {
-		h.logger.Printf("Error retriving all users - %s\n", usersErr)
+		h.logger.Printf("Error retrieving all users - %s\n", usersErr)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func (h *Handler) GetUsersWithAgeHandler(ctx *gin.Context) {
+	usersWithAge, usersWithAgeErr := h.DBClient.UsersWithAge(ctx)
+	if usersWithAgeErr != nil {
+		h.logger.Printf("Error retrieving users with age - %s\n", usersWithAgeErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"users": usersWithAge})
+}
+
+func (h *Handler) GetAgeStatsHandler(ctx *gin.Context) {
+	ageStats, ageStatsErr := h.DBClient.AgeStats(ctx)
+	if ageStatsErr != nil {
+		h.logger.Printf("Error retrieving age stats - %s\n", ageStatsErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"age_stats": ageStats})
 }

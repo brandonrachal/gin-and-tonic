@@ -38,7 +38,9 @@ func main() {
 	router.GET("/user", handler.GetUserHandler)
 	router.PUT("/user", handler.UpdateUserHandler)
 	router.DELETE("/user", handler.DeleteUserHandler)
-	router.GET("/users", handler.GetAllUsersHandler)
+	router.GET("/users", handler.GetUsersHandler)
+	router.GET("/users_with_age", handler.GetUsersWithAgeHandler)
+	router.GET("/age_stats", handler.GetAgeStatsHandler)
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
