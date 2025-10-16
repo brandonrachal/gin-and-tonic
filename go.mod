@@ -3,14 +3,12 @@ module github.com/brandonrachal/gin-and-tonic
 go 1.24.5
 
 require (
-	github.com/brandonrachal/go-toolbox v0.0.0-20251009064330-93af24be1e48
+	github.com/brandonrachal/go-toolbox v0.0.0-20251013025635-f108753e55f4
 	github.com/gin-gonic/gin v1.11.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/stretchr/testify v1.11.1
 )
-
-replace github.com/brandonrachal/go-toolbox => ../go-toolbox
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
