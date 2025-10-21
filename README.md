@@ -23,31 +23,31 @@ A go api server for fun
     curl -X POST \
     -H "Content-Type: application/json" \
     -d '{"first_name": "Brandon", "last_name": "Rachal", "email": "brandon.rachal@gmail.com", "birthday": "2025-10-12"}' \
-    localhost:8080/user
+    localhost:8080/v1.0/user
 
 ### Get a user
 
-    curl -X GET -H "Content-Type: application/json" -d '{"id": 1}' localhost:8080/user
+    curl -X GET -H "Content-Type: application/json" -d '{"id": 1}' localhost:8080/v1.0/user
 
 ### Update a user
 
     curl -X PUT \
     -H "Content-Type: application/json" \
     -d '{"id": 1, "first_name": "Sam", "last_name": "Rachal", "email": "sam.rachal@gmail.com", "birthday": "1990-06-15"}' \
-    localhost:8080/user
+    localhost:8080/v1.0/user
 
 ### Delete a user
 
-    curl -X DELETE -H "Content-Type: application/json" -d '{"id": 1}' localhost:8080/user
+    curl -X DELETE -H "Content-Type: application/json" -d '{"id": 1}' localhost:8080/v1.0/user
 
 ### Get all users
 
-    curl -X GET -H "Content-Type: application/json" localhost:8080/users
+    curl -X GET -H "Content-Type: application/json" localhost:8080/v1.0/users
 
 ### Get all users with age
 
-    curl -X GET -H "Content-Type: application/json" localhost:8080/users_with_age
+    curl -X GET -H "Content-Type: application/json" localhost:8080/v1.0/users_with_age
 
 ### Get age stats
 
-    curl -X GET -H "Content-Type: application/json" localhost:8080/age_stats
+    curl -X GET -H "Content-Type: application/json" localhost:8080/v1.0/age_stats
