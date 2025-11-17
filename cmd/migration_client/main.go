@@ -5,29 +5,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/brandonrachal/gin-and-tonic/internal"
 	"github.com/brandonrachal/go-toolbox/cliutils"
-	"github.com/brandonrachal/go-toolbox/dbutils"
-	"github.com/brandonrachal/go-toolbox/envutils"
 	"github.com/brandonrachal/go-toolbox/migrations"
 )
 
-const (
-	migrationTable = "goose_migrations"
-)
-
 func main() {
-	bgCtx := context.Background()
-	ctx, cancelFunc := cliutils.InitSignals(bgCtx)
+	ctx, cancelFunc := cliutils.InitSignals(context.Background())
 	defer cancelFunc()
-
-	goEnv, goEnvErr := envutils.NewGoEnv()
-	if goEnvErr != nil {
-		fmt.Printf("error loading go enviroment - %s", goEnvErr)
-		os.Exit(1)
-	}
-	moduleRoot := goEnv.ModuleRootPath()
-	migrationDir := fmt.Sprintf("%s/migrations", moduleRoot)
-	dsn := fmt.Sprintf("%s/data/sqlite_database.db", moduleRoot)
 
 	migrateCmdData, migrateCmdDataErr := migrations.GetMigrationCmdData(false)
 	if migrateCmdDataErr != nil {
@@ -38,7 +23,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	migrateClient, migrateClientErr := migrations.NewClient(dbutils.SQLite, dsn, migrationTable, migrationDir)
+	migrateClient, migrateClientErr := internal.ProdDBMigrationClient()
 	if migrateClientErr != nil {
 		fmt.Printf("error getting new migration client - %s\n", migrateClientErr)
 		os.Exit(1)

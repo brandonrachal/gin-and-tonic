@@ -3,36 +3,38 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
-	"path/filepath"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/brandonrachal/gin-and-tonic/api/v1"
-	"github.com/brandonrachal/gin-and-tonic/db"
-	"github.com/brandonrachal/go-toolbox/cliutils"
-	"github.com/brandonrachal/go-toolbox/envutils"
+	"github.com/brandonrachal/gin-and-tonic/controllers"
+	"github.com/brandonrachal/gin-and-tonic/internal"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	ctx, cancelFunc, logger := cliutils.InitDevConsole()
-	defer cancelFunc()
+	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	logger.SetOutput(gin.DefaultWriter)
 
-	goEnv, goEnvErr := envutils.NewGoEnv()
-	if goEnvErr != nil {
-		logger.Fatalf("Could not retrieve the go env - %s\n", goEnvErr)
-	}
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
 
-	rootPath := goEnv.ModuleRootPath()
-	sqliteDBPath := filepath.Join(rootPath, "data/sqlite_database.db")
-	dbClient, dbClientErr := db.NewClient(sqliteDBPath)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		cancelFunc()
+	}()
+
+	dbClient, dbClientErr := internal.ProdDBClient()
 	if dbClientErr != nil {
 		logger.Fatalf("Could not retrieve the db client - %s\n", dbClientErr)
 	}
 
-	router := gin.Default()
-	v1.AddRoutes(router, logger, dbClient)
+	router := controllers.GetRouter(logger, dbClient)
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,

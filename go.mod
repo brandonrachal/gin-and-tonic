@@ -3,7 +3,7 @@ module github.com/brandonrachal/gin-and-tonic
 go 1.24.5
 
 require (
-	github.com/brandonrachal/go-toolbox v0.0.0-20251013025635-f108753e55f4
+	github.com/brandonrachal/go-toolbox v0.0.0-20251114005259-a2260e40ce67
 	github.com/gin-gonic/gin v1.11.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.32
