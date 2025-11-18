@@ -91,7 +91,6 @@ func TestCreateUserAction(t *testing.T) {
 	ctx := context.Background()
 	_, deleteResultErr := dbClient.DeleteAllUsers(ctx)
 	r.NoError(deleteResultErr)
-
 	// Bad user data
 	newUser, newUserErr := GetFirstNewUser()
 	r.NoError(newUserErr)
@@ -106,7 +105,6 @@ func TestCreateUserAction(t *testing.T) {
 		}
 	}()
 	r.Equal(http.StatusBadRequest, badResp.StatusCode)
-
 	// Create a user
 	newUser, newUserErr = GetFirstNewUser()
 	r.NoError(newUserErr)
@@ -121,7 +119,6 @@ func TestCreateUserAction(t *testing.T) {
 	user, userErr := dbClient.GetFirstUser(ctx)
 	r.NoError(userErr)
 	r.NotNil(user)
-
 	// No duplicate user
 	dupResp := callRequest(r, "POST", "/v1.0/user", newUser)
 	defer func() {
@@ -139,7 +136,6 @@ func TestGetUserAction(t *testing.T) {
 	user, userErr := getFirstOrCreateUser(ctx)
 	r.NoError(userErr)
 	userId := models.GetIdUser(user.Id)
-
 	// Get User
 	userResp := callRequest(r, "GET", "/v1.0/user", userId)
 	defer func() {
@@ -149,7 +145,6 @@ func TestGetUserAction(t *testing.T) {
 		}
 	}()
 	r.Equal(http.StatusOK, userResp.StatusCode)
-
 	// Get User Bad Data
 	userIdBadData := "{\"user\": nil}"
 	userBadResp := callRequest(r, "GET", "/v1.0/user", userIdBadData)
@@ -165,10 +160,9 @@ func TestGetUserAction(t *testing.T) {
 func TestUpdateUserAction(t *testing.T) {
 	ctx := context.Background()
 	r := require.New(t)
-
 	user, userErr := getFirstOrCreateUser(ctx)
 	r.NoError(userErr)
-
+	// Update user good
 	newFirstName := "HELLO!"
 	user.FirstName = newFirstName
 	goodResp := callRequest(r, "PUT", "/v1.0/user", user)
@@ -179,7 +173,6 @@ func TestUpdateUserAction(t *testing.T) {
 		}
 	}()
 	r.Equal(http.StatusOK, goodResp.StatusCode)
-
 	user, userErr = dbClient.GetUser(ctx, user.Id)
 	r.NoError(userErr)
 	r.NotNil(user)
@@ -191,7 +184,6 @@ func TestDeleteUserAction(t *testing.T) {
 	r := require.New(t)
 	user, userErr := getFirstOrCreateUser(ctx)
 	r.NoError(userErr)
-
 	// Delete user
 	userId := models.GetIdUser(user.Id)
 	goodResp := callRequest(r, "DELETE", "/v1.0/user", userId)
@@ -202,7 +194,6 @@ func TestDeleteUserAction(t *testing.T) {
 		}
 	}()
 	r.Equal(http.StatusOK, goodResp.StatusCode)
-
 	user, userErr = dbClient.GetUser(ctx, user.Id)
 	r.Error(userErr)
 	r.True(errors.Is(userErr, sql.ErrNoRows))
@@ -212,7 +203,6 @@ func TestGetUsersAction(t *testing.T) {
 	ctx := context.Background()
 	r := require.New(t)
 	createUsers(ctx, r)
-
 	// Get users
 	goodResp := callRequest(r, "GET", "/v1.0/users", nil)
 	defer func() {
@@ -234,7 +224,6 @@ func TestGetUsersWithAgeAction(t *testing.T) {
 	ctx := context.Background()
 	r := require.New(t)
 	createUsers(ctx, r)
-
 	// Get Users with age
 	goodResp := callRequest(r, "GET", "/v1.0/users_with_age", nil)
 	defer func() {
@@ -256,9 +245,8 @@ func TestGetAgeStatsAction(t *testing.T) {
 	ctx := context.Background()
 	r := require.New(t)
 	createUsers(ctx, r)
-
 	// Users with age
-	goodResp := callRequest(r, "GET", "/v1.0/users_with_age", nil)
+	goodResp := callRequest(r, "GET", "/v1.0/age_stats", nil)
 	defer func() {
 		closeErr := goodResp.Body.Close()
 		if closeErr != nil {
