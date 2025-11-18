@@ -13,16 +13,16 @@ import (
 )
 
 type Client struct {
-	DbConn             *sqlx.DB
-	createUserStmt     *sqlx.Stmt
-	getUserStmt        *sqlx.Stmt
-	getFirstUserStmt   *sqlx.Stmt
-	getUsersStmt       *sqlx.Stmt
-	updateUserStmt     *sqlx.Stmt
-	deleteUserStmt     *sqlx.Stmt
-	deleteAllUsersStmt *sqlx.Stmt
-	getUsersWithAgeSql string
-	getAgeStatsSql     string
+	DbConn              *sqlx.DB
+	createUserStmt      *sqlx.Stmt
+	getUserStmt         *sqlx.Stmt
+	getFirstUserStmt    *sqlx.Stmt
+	getUsersStmt        *sqlx.Stmt
+	getUsersWithAgeStmt *sqlx.Stmt
+	getAgeStatsStmt     *sqlx.Stmt
+	updateUserStmt      *sqlx.Stmt
+	deleteUserStmt      *sqlx.Stmt
+	deleteAllUsersStmt  *sqlx.Stmt
 }
 
 func NewClient(dataSourceName string) (*Client, error) {
@@ -36,7 +36,7 @@ func NewClient(dataSourceName string) (*Client, error) {
 		return nil, createUserStmtErr
 	}
 
-	getUsersSql := `SELECT id, first_name, last_name, email, birthday FROM users`
+	getUsersSql := `select id, first_name, last_name, email, birthday from users`
 	getUsersStmt, getUsersStmtErr := dbConn.Preparex(getUsersSql)
 	if getUsersStmtErr != nil {
 		return nil, getUsersStmtErr
@@ -70,34 +70,42 @@ func NewClient(dataSourceName string) (*Client, error) {
 		return nil, updateUserStmtErr
 	}
 
-	getUsersWithAgeSql := `select id, first_name, last_name, email, birthday, ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) AS age_in_years from users;`
+	getUsersWithAgeSql := `select id, first_name, last_name, email, birthday, ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) as age_in_years from users;`
+	getUsersWithAgeStmt, getUsersWithAgeStmtErr := dbConn.Preparex(getUsersWithAgeSql)
+	if getUsersWithAgeStmtErr != nil {
+		return nil, getUsersWithAgeStmtErr
+	}
 
 	getAgeStatsSql := `select
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 13 then 1 end) as preteen,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 12 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 20 then 1 end) as teens,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 19 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 30 then 1 end) as twenties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 29 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 40 then 1 end) as thirties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 39 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 50 then 1 end) as forties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 49 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 60 then 1 end) as fifties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 59 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 70 then 1 end) as sixties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 69 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 80 then 1 end) as seventies,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 79 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 90 then 1 end) as eighties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 89 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 100 then 1 end) as nineties,
-    count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 99 then 1 end) as centurion
-from
-    users;`
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 13 then 1 end) as preteen,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 12 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 20 then 1 end) as teens,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 19 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 30 then 1 end) as twenties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 29 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 40 then 1 end) as thirties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 39 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 50 then 1 end) as forties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 49 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 60 then 1 end) as fifties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 59 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 70 then 1 end) as sixties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 69 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 80 then 1 end) as seventies,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 79 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 90 then 1 end) as eighties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 89 and ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) < 100 then 1 end) as nineties,
+		count(case when ROUND((JULIANDAY('now') - JULIANDAY(birthday)) / 365.25) > 99 then 1 end) as centurion
+	from
+		users;`
+	getAgeStatsStmt, getAgeStatsStmtErr := dbConn.Preparex(getAgeStatsSql)
+	if getAgeStatsStmtErr != nil {
+		return nil, getAgeStatsStmtErr
+	}
 
 	return &Client{
-		DbConn:             dbConn,
-		createUserStmt:     createUserStmt,
-		getUserStmt:        getUserStmt,
-		getFirstUserStmt:   getFirstUserStmt,
-		updateUserStmt:     updateUserStmt,
-		deleteUserStmt:     deleteUserStmt,
-		deleteAllUsersStmt: deleteAllUsersStmt,
-		getUsersStmt:       getUsersStmt,
-		getUsersWithAgeSql: getUsersWithAgeSql,
-		getAgeStatsSql:     getAgeStatsSql,
+		DbConn:              dbConn,
+		createUserStmt:      createUserStmt,
+		getUserStmt:         getUserStmt,
+		getFirstUserStmt:    getFirstUserStmt,
+		getUsersStmt:        getUsersStmt,
+		getUsersWithAgeStmt: getUsersWithAgeStmt,
+		getAgeStatsStmt:     getAgeStatsStmt,
+		updateUserStmt:      updateUserStmt,
+		deleteUserStmt:      deleteUserStmt,
+		deleteAllUsersStmt:  deleteAllUsersStmt,
 	}, nil
 }
 
@@ -156,17 +164,28 @@ func (db *Client) DeleteAllUsers(ctx context.Context) (sql.Result, error) {
 }
 
 func (db *Client) GetUsersWithAge(ctx context.Context) ([]models.UserWithAge, error) {
-	var usersWithAage []models.UserWithAge
-	err := db.DbConn.SelectContext(ctx, &usersWithAage, db.getUsersWithAgeSql)
+	var users []models.UserWithAge
+	rows, err := db.getUsersWithAgeStmt.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return usersWithAage, nil
+	defer func() {
+		_ = rows.Close()
+	}()
+	for rows.Next() {
+		var user models.UserWithAge
+		err = rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Birthday, &user.AgeInYears)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }
 
 func (db *Client) GetAgeStats(ctx context.Context) (*models.AgeStats, error) {
 	var ageStats models.AgeStats
-	err := db.DbConn.GetContext(ctx, &ageStats, db.getAgeStatsSql)
+	err := db.getAgeStatsStmt.GetContext(ctx, &ageStats)
 	if err != nil {
 		return nil, err
 	}
