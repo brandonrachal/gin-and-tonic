@@ -10,6 +10,7 @@ A go api server for fun
 
     touch data/sqlite_prod_database.db
     touch data/sqlite_test_database.db
+    touch data/sqlite_dev_database.db
 
 ### Run the migrations
 
